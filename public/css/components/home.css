@@ -73,12 +73,20 @@
   font-size: 1rem;
   padding: 9px 8px;
   width: 100%;
-  border: 1px solid #17a2b8;
   border-radius: 3px;
   cursor: pointer;
-  background: #17a2b8;
   color: #fff;
   margin-bottom: 15px;
+}
+
+.app-content__controls-form .btn-toggle.hidden {
+  background: #17a2b8;
+  border: 1px solid #17a2b8;
+}
+
+.app-content__controls-form .btn-toggle.show {
+  background: #f00;
+  border: 1px solid #f00;
 }
 
 .app-content__controls-form .form-group {
@@ -178,4 +186,8 @@
   cursor: pointer;
   background: #dc3545;
   color: #fff;
+}
+
+.form-main.hidden .form-wrapper {
+  display: none;
 }

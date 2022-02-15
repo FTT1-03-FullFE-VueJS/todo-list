@@ -204,3 +204,77 @@
 // console.log(result);
 // undefined, null, 0, false, [] => false
 // 1,2,3,4, => true
+
+/**
+ * ASC: Sắp xếp tăng dần
+ * DESC: Sắp xếp giảm dần
+ */
+
+/**
+ * Tìm hiểu về thuật toán sắp sếp nổi bọt bubble sort
+ */
+/**
+ * 2 loại toán tử so sánh bằng
+ *
+ * a == b :
+ *   - Lấy giá trị của biến a so sánh với biến b
+ * a === b :
+ *   - Lấy giá trị của biến a so sánh với biến b
+ *   - Lấy kiểu dữ liệu của biến a so sánh với biến b
+ */
+
+/**
+ * Vd vong lap
+ */
+
+var arr = ['Item 1', 'Item 2', 'Item 3', 'Item 4']; //4
+
+// for (let i=0; i<i+1; i++) {
+//   console.log('chay vong lap: ' + i);
+// }
+
+// i: 0
+// i<i+1: 0<1 true
+
+// i: 1
+// i<i+1: 1<2 true
+
+// i: 2
+// i<i+1: 2<3 true
+
+
+/**
+ * i: 4
+ * phep so sanh: true, true, true, false
+ * thuc thi code:
+ * gia tri tang: i++:
+ */
+
+// Ket qua hien ra:
+// console.log('chay vong lap 0');
+// console.log('chay vong lap 1');
+// console.log('chay vong lap 2');
+// console.log('chay vong lap 3');
+// console.log('ngung vong lap');
+
+
+result = [2,1,3,4,5]
+
+// i: 0
+// i+1: 1
+
+// result[i] <=> result[0] = 2
+// result[i+1] <=> result[1] = 1
+
+// if (result[i] > result[i+1]) { // 2 > 1
+//   tmp = result[i];
+//   result[i] = result[i+1];
+//   result[i+1] = tmp;
+// }
+
+// tmp = 2
+// result[i] = 1
+// result[i+1] = 2
+
+// // result[i] = 1
+// // result[i+1] = 2
