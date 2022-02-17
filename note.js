@@ -257,8 +257,7 @@ var arr = ['Item 1', 'Item 2', 'Item 3', 'Item 4']; //4
 // console.log('chay vong lap 3');
 // console.log('ngung vong lap');
 
-
-result = [2,1,3,4,5]
+// result = [2,1,3,4,5]
 
 // i: 0
 // i+1: 1

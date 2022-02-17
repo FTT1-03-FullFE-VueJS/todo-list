@@ -1,4 +1,3 @@
-import Tasks from '../../data/tasks.js';
 import { convertLevel } from '../../utils/helpers.js';
 import TaskModel from '../../models/task.js';
 
@@ -32,17 +31,24 @@ function init() {
   const $sortValue = document.getElementById('sort-value');
   const $btnToggle = document.getElementById('btn-toggle');
   const $mainForm = document.getElementById('form-main');
+  const LOCAL_STORAGE_TASK_LIST = 'taskLists';
+
+  const taskInLocalStore = localStorage.getItem(LOCAL_STORAGE_TASK_LIST)
+                            ? JSON.parse(localStorage.getItem(LOCAL_STORAGE_TASK_LIST))
+                            : [];
+
+  let Tasks = taskInLocalStore;
 
   renderTasks(Tasks);
   renderSortList(sortTypeData);
 
-  let isShowForm = false;
-
-  let searchString = '';
-  let sortData = {
+  let __isShowForm = false;
+  let __searchString = '';
+  let __sortData = {
     sortBy: 'title',
     orderBy: 'asc'
   };
+  let __taskTarget = null;
 
   $searchInput.addEventListener('input', search);
   $sortSelect.addEventListener('change', sort);
@@ -50,51 +56,140 @@ function init() {
   $mainForm.addEventListener('submit', submitForm);
 
   function submitForm(e) {
-    e.preventDefault();
     const $taskName = document.getElementById('task-name-value');
     const $taskLevel = document.getElementById('task-level-value');
-
     const taskNameValue = $taskName.value;
     const taskLevelValue = parseInt($taskLevel.value);
 
-    // Validate title
-    if (taskNameValue.length <= 0) {
-      alert('Bạn vui lòng nhập task title');
+    e.preventDefault();
+    if (__taskTarget === null) {
+      // Handle create new
+      if (taskNameValue.length <= 0) {
+        alert('Bạn vui lòng nhập task title');
+      } else {
+        const taskModel = new TaskModel(uuidv4(), taskNameValue, taskLevelValue);
+        Tasks.push(taskModel);
+        saveStorage(Tasks);
+        renderTasks(Tasks);
+      }
     } else {
-      const taskModel = new TaskModel(uuidv4(), taskNameValue, taskLevelValue);
-      Tasks.push(taskModel);
-      console.log(taskModel)
+      // Handle update
+      const taskNew = {
+        id: __taskTarget.id,
+        title: taskNameValue,
+        level: taskLevelValue
+      }
+
+      const indexTask = Tasks.findIndex(function (item) {
+        if (item.id === __taskTarget.id) {
+          return true;
+        }
+        return false;
+      });
+
+      Tasks.splice(indexTask, 1, taskNew);
       renderTasks(Tasks);
+      saveStorage(Tasks);
     }
+
+    // Handle reset form
+    __taskTarget = null;
+    $taskName.value = '';
+    $taskLevel.value = 1;
+    toggleForm();
+  }
+
+  function saveStorage(tasks) {
+    localStorage.setItem(LOCAL_STORAGE_TASK_LIST, JSON.stringify(tasks));
   }
 
   function toggleForm() {
-    if (isShowForm === true) {// nếu bằng true => form đang bậc
+    if (__isShowForm === true) {// nếu bằng true => form đang bậc
       // Tắc form đi
       $mainForm.classList.add('hidden');
       $btnToggle.innerText = 'Hiển thị form';
       $btnToggle.classList.remove('show');
       $btnToggle.classList.add('hidden');
-      isShowForm = false;
+      __isShowForm = false;
     } else {// nếu bằng false => form đang tắc
       // Bặc form lên
       $mainForm.classList.remove('hidden');
       $btnToggle.innerText = 'Bậc form lên';
       $btnToggle.classList.remove('hidden');
       $btnToggle.classList.add('show');
-      isShowForm = true;
+      __isShowForm = true;
     }
+  }
+
+  function handleDelete() {
+    const $listButtonDelete = document.querySelectorAll('.btn-delete');
+
+    $listButtonDelete.forEach($el => {
+      $el.addEventListener('click', function (e) {
+        const $btn = e.target;
+        const $parent = $btn.parentNode.parentElement;
+        const taskId = $parent.getAttribute('data-id');
+        if (handleConfirm('You are sure delete this task?')) {
+          const indexTask = Tasks.findIndex(function (item) {
+            if (item.id === taskId) {
+              return true;
+            }
+            return false;
+          });
+
+          Tasks.splice(indexTask, 1);
+          renderTasks(Tasks);
+          saveStorage(Tasks);
+        }
+      });
+    });
+  }
+
+  function handleConfirm(textConfirm) {
+    const confirmed = confirm(textConfirm);
+    return confirmed;
+  }
+
+  function handleEdit() {
+    const $listButtonEdit = document.querySelectorAll('.btn-edit');
+
+    $listButtonEdit.forEach($el => {
+      $el.addEventListener('click', function (e) {
+        const $btn = e.target;
+        const $parent = $btn.parentNode.parentElement;
+        const taskId = $parent.getAttribute('data-id');
+
+        __taskTarget = Tasks.find(function (item) {
+          if (item.id === taskId) {
+            return true;
+          }
+          return false;
+        });
+
+        $mainForm.classList.remove('hidden');
+        $btnToggle.innerText = 'Bậc form lên';
+        $btnToggle.classList.remove('hidden');
+        $btnToggle.classList.add('show');
+        __isShowForm = true;
+
+        const $taskName = document.getElementById('task-name-value');
+        const $taskLevel = document.getElementById('task-level-value');
+
+        $taskName.value = __taskTarget.title;
+        $taskLevel.value = __taskTarget.level;
+      });
+    });
   }
 
   function search(e) {
     // Lấy giá trị trong input
-    searchString = e.target.value;
+    __searchString = e.target.value;
     // Copy ds task list của mình qua một ds mới
     // Tại sao phải copy
     // Để ko bị thay đổi giá trị của task gốc => Tasks
     // let taskListCopy = [...Tasks];
     // const result = taskListCopy.filter((task) => {
-    //   if ( (task.title.toLowerCase()).includes(searchString.toLowerCase()) ) {
+    //   if ( (task.title.toLowerCase()).includes(__searchString.toLowerCase()) ) {
     //     return true;
     //   } else {
     //     return false;
@@ -121,8 +216,8 @@ function init() {
     const sortBy = value[0];
     const orderBy = value[1];
 
-    sortData.sortBy = sortBy;
-    sortData.orderBy = orderBy;
+    __sortData.sortBy = sortBy;
+    __sortData.orderBy = orderBy;
 
     // $sortValue.innerHTML = `${sortBy.toUpperCase()} - ${orderBy.toUpperCase()}`;
     filterData();
@@ -133,7 +228,7 @@ function init() {
     // Sort trước hay search trước
     let taskListCopy = [...Tasks];
     const result = taskListCopy.filter((task) => {
-      if ( (task.title.toLowerCase()).includes(searchString.toLowerCase()) ) {
+      if ( (task.title.toLowerCase()).includes(__searchString.toLowerCase()) ) {
         return true;
       } else {
         return false;
@@ -153,7 +248,7 @@ function init() {
      * 1,2,3,4
      */
 
-    if (sortData.sortBy === 'title') {
+    if (__sortData.sortBy === 'title') {
 
       let tmp = {};
 
@@ -163,7 +258,7 @@ function init() {
        */
       for (let i = 0; i < result.length - 1; i++) {
         // kiểm tra order by
-        if (sortData.orderBy === 'asc') {
+        if (__sortData.orderBy === 'asc') {
           // Sắp xếp tăng dần
           if ( result[i].title > result[i+1].title ) {
             tmp = result[i];
@@ -224,6 +319,8 @@ function init() {
 
     const tasksHTMLString = tasksHTMLArray.join('');
     $table.innerHTML = tasksHTMLString;
+    handleDelete();
+    handleEdit();
   }
 
   function renderSortList(list) {
